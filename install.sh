@@ -22,10 +22,28 @@ check_project_dir(){
  fi
 }
 
+create_config_env(){
+ if [[ -f "$PROJECT_DIR/config.env" ]]; then
+  echo "OK: config.env already exists."
+  return 0
+ fi
+
+ if [[ ! -f "$PROJECT_DIR/config.env.example" ]]; then
+  echo "WARN: config.env.example not found, skipping config.env creation."
+  return 0
+ fi
+
+ cp "$PROJECT_DIR/config.env.example" "$PROJECT_DIR/config.env"
+ chmod 600 "$PROJECT_DIR/config.env"
+
+ echo "OK: config.env created from config.env.example."
+}
+
 main(){
 
  require_root
  check_project_dir
+ create_config_env
 
  echo "OK: install checks passed."
 }
