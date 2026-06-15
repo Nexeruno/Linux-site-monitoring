@@ -67,7 +67,27 @@ check_required_commands(){
  echo "OK: required commands are available."
 }
 
+install_systemd_files(){
+ local service_file="$PROJECT_DIR/systemd/site-monitor.service"
+ local timer_file="$PROJECT_DIR/systemd/site-monitor.timer"
 
+ if [[ ! -f "$service_file" ]]; then
+  echo "ERROR: Missing systemd service file: $service_file"
+  exit 1
+ fi
+
+ if [[ ! -f "$timer_file" ]]; then
+  echo "ERROR: Missing systemd timer file: $timer_file"
+  exit 1
+ fi
+
+ cp "$service_file" /etc/systemd/system/site-monitor.service
+ cp "$timer_file" /etc/systemd/system/site-monitor.timer
+ 
+ systemctl daemon-reload
+ 
+ echo "OK: systemd service and timer installed."
+}
 
 main(){
 
@@ -76,6 +96,8 @@ main(){
  create_config_env
  create_runtime_dirs
  check_required_commands
+ install_systemd_files
+
  echo "OK: install checks passed."
 }
 
