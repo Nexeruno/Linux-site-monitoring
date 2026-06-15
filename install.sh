@@ -39,12 +39,22 @@ create_config_env(){
  echo "OK: config.env created from config.env.example."
 }
 
+create_runtime_dirs(){
+ mkdir -p "$PROJECT_DIR/logs"
+ mkdir -p "$PROJECT_DIR/state"
+ 
+ chmod 755 "$PROJECT_DIR/logs"
+ chmod 755 "$PROJECT_DIR/state"
+
+ echo "OK: runtime directories are ready."
+}
+
 main(){
 
  require_root
  check_project_dir
  create_config_env
-
+ create_runtime_dirs
  echo "OK: install checks passed."
 }
 
