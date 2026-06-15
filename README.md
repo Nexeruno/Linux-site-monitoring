@@ -13,6 +13,7 @@ Simple Linux/Bash monitoring project for checking website availability and pract
 * creates alert events: `DOWN` / `RECOVERED`
 * stores website state to prevent repeated alert spam
 * creates a current status report in `status.txt`
+* supports runtime configuration through `config.env`
 * supports cron execution as an alternative
 * supports systemd service and systemd timer
 * uses `flock` to prevent parallel runs
@@ -36,6 +37,8 @@ Simple Linux/Bash monitoring project for checking website availability and pract
 * `site.sh` - checks one URL
 * `run-sites.sh` - runs checks for all URLs from `urls.txt`
 * `urls.txt` - list of monitored URLs
+* `config.env.example` - example runtime configuration
+* `config.env` - local runtime configuration, ignored by Git
 * `systemd/site-monitor.service` - example systemd service file
 * `systemd/site-monitor.timer` - example systemd timer file
 * `logrotate/site-monitor` - example logrotate configuration
@@ -43,7 +46,30 @@ Simple Linux/Bash monitoring project for checking website availability and pract
 * `logs/alerts.log` - DOWN/RECOVERED alert history
 * `state/` - internal state files for monitored URLs
 
-> Runtime files such as `logs/` and `state/` are ignored by Git and are generated when the project runs.
+> Runtime files such as `logs/`, `state/` and local `config.env` are ignored by Git and are generated or configured locally.
+
+## Configuration
+
+The project uses a local `config.env` file for runtime configuration.
+
+Create it from the example file:
+
+```bash
+cp config.env.example config.env
+```
+
+Example values:
+
+```bash
+SLOW_LIMIT=2
+MONITOR_SOFT_FAIL=1
+```
+
+`SLOW_LIMIT` defines when a website is considered slow.
+
+`MONITOR_SOFT_FAIL=1` allows the systemd service to finish successfully even when some monitored sites are down. The degraded state is still visible in `status.txt` and `alerts.log`.
+
+The local `config.env` file is ignored by Git.
 
 ## Systemd usage
 
@@ -105,7 +131,7 @@ This prevents log files from growing forever and keeps the last 4 weekly rotatio
 
 ## What I learned
 
-This project helped me practice Linux, Bash scripting, working with files and paths, exit codes, logging, troubleshooting, cron automation, systemd services, systemd timers, journalctl, flock, logrotate and basic monitoring logic.
+This project helped me practice Linux, Bash scripting, working with files and paths, exit codes, environment configuration, logging, troubleshooting, cron automation, systemd services, systemd timers, journalctl, flock, logrotate and basic monitoring logic.
 
 The goal was not to use a ready-made monitoring tool, but to understand how monitoring, logs, automation and operational behavior work directly in Linux.
 
@@ -126,6 +152,7 @@ Jednoduchý Linux/Bash monitoring projekt pro kontrolu dostupnosti webů a procv
 * alerty `DOWN` / `RECOVERED`
 * ukládání stavu webů, aby se neopakovaly stejné alerty pořád dokola
 * aktuální status report v souboru `status.txt`
+* podpora runtime konfigurace přes `config.env`
 * podpora spouštění přes cron jako alternativa
 * podpora systemd service a systemd timeru
 * ochrana proti paralelnímu spuštění pomocí `flock`
@@ -149,6 +176,8 @@ Jednoduchý Linux/Bash monitoring projekt pro kontrolu dostupnosti webů a procv
 * `site.sh` - kontrola jedné URL
 * `run-sites.sh` - spouští kontrolu všech URL ze souboru `urls.txt`
 * `urls.txt` - seznam monitorovaných URL
+* `config.env.example` - ukázková runtime konfigurace
+* `config.env` - lokální runtime konfigurace, ignorovaná Gitem
 * `systemd/site-monitor.service` - ukázkový systemd service soubor
 * `systemd/site-monitor.timer` - ukázkový systemd timer soubor
 * `logrotate/site-monitor` - ukázková logrotate konfigurace
@@ -156,7 +185,30 @@ Jednoduchý Linux/Bash monitoring projekt pro kontrolu dostupnosti webů a procv
 * `logs/alerts.log` - historie alertů DOWN/RECOVERED
 * `state/` - interní stavové soubory pro monitorované URL
 
-> Runtime soubory jako `logs/` a `state/` nejsou ukládané do Gitu a vytvoří se až při běhu projektu.
+> Runtime soubory jako `logs/`, `state/` a lokální `config.env` nejsou ukládané do Gitu a vytvoří se nebo nastaví lokálně.
+
+## Konfigurace
+
+Projekt používá lokální soubor `config.env` pro runtime konfiguraci.
+
+Vytvoření z ukázkového souboru:
+
+```bash
+cp config.env.example config.env
+```
+
+Příklad hodnot:
+
+```bash
+SLOW_LIMIT=2
+MONITOR_SOFT_FAIL=1
+```
+
+`SLOW_LIMIT` určuje, kdy je web považovaný za pomalý.
+
+`MONITOR_SOFT_FAIL=1` dovolí systemd službě doběhnout úspěšně i ve chvíli, kdy některý monitorovaný web nefunguje. Stav `DEGRADED` je pořád vidět v `status.txt` a `alerts.log`.
+
+Lokální soubor `config.env` je ignorovaný Gitem.
 
 ## Použití přes systemd
 
@@ -218,7 +270,7 @@ Tím se zabrání tomu, aby log soubory rostly donekonečna. Konfigurace necháv
 
 ## Co jsem se naučil
 
-Na projektu jsem si procvičil Linux, Bash skriptování, práci se soubory a cestami, exit kódy, logování, troubleshooting, automatizaci přes cron, systemd služby, systemd timery, journalctl, flock, logrotate a základní logiku monitoringu.
+Na projektu jsem si procvičil Linux, Bash skriptování, práci se soubory a cestami, exit kódy, environment konfiguraci, logování, troubleshooting, automatizaci přes cron, systemd služby, systemd timery, journalctl, flock, logrotate a základní logiku monitoringu.
 
 Cílem nebylo použít hotové monitorovací řešení, ale pochopit, jak monitoring, logy, automatizace a provozní chování fungují přímo v Linuxu.
 
