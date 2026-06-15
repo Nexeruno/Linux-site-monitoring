@@ -3,3 +3,4 @@ state/
 *.log
 *.csv
 *.gz
+config.env
