@@ -1,0 +1,11 @@
+# produkcni weby
+https://google.cz
+https://seznam.cz
+
+# nefunkcni weby
+https://googluuu.cz
+
+# spatne
+seznam.cz
+www.google.com
+ftp://test.cz
