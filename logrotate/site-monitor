@@ -1,0 +1,8 @@
+/root/training/cron_logs/cron.log /root/training/site/logs/site.log /root/training/site/logs/site.csv /root/training/site/logs/alerts.log  {
+    weekly
+    rotate 4
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
