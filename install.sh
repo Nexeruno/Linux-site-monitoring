@@ -89,6 +89,13 @@ install_systemd_files(){
  echo "OK: systemd service and timer installed."
 }
 
+enable_timer(){
+ systemctl enable --now site-monitor.timer
+ 
+ echo "OK: site-monitor.timer enabled and started."
+}
+
+
 main(){
 
  require_root
@@ -97,6 +104,7 @@ main(){
  create_runtime_dirs
  check_required_commands
  install_systemd_files
+ enable_timer
 
  echo "OK: install checks passed."
 }
