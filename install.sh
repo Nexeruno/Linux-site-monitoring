@@ -95,6 +95,21 @@ enable_timer(){
  echo "OK: site-monitor.timer enabled and started."
 }
 
+verify_timer(){
+ if ! systemctl is-enabled site-monitor.timer >/dev/null 2>&1; then
+  echo "ERROR: site-monitor.timer is not enabled."
+  exit 1
+ fi
+
+ if ! systemctl is-active site-monitor.timer >/dev/null 2>&1; then
+  echo "ERROR: site-monitor.timer is not active."
+  exit 1
+ fi
+
+ echo "OK: site-monitor.timer is enabled and active"
+}
+
+
 
 main(){
 
@@ -105,7 +120,9 @@ main(){
  check_required_commands
  install_systemd_files
  enable_timer
-
+ verify_timer
+ 
+ 
  echo "OK: install checks passed."
 }
 
