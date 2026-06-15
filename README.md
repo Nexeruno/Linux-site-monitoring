@@ -38,6 +38,7 @@ Simple Linux/Bash monitoring project for checking website availability and pract
 * `urls.txt` - list of monitored URLs
 * `systemd/site-monitor.service` - example systemd service file
 * `systemd/site-monitor.timer` - example systemd timer file
+* `logrotate/site-monitor` - example logrotate configuration
 * `logs/status.txt` - current status report
 * `logs/alerts.log` - DOWN/RECOVERED alert history
 * `state/` - internal state files for monitored URLs
@@ -77,6 +78,30 @@ Example cron command:
 ```bash
 */5 * * * * (mkdir -p /root/training/cron_logs && /usr/bin/flock -n -E 99 /tmp/site-monitor.lock /root/training/site/run-sites.sh) >> /root/training/cron_logs/cron.log 2>&1
 ```
+
+## Logrotate usage
+
+Example logrotate configuration is included in the `logrotate/` directory.
+
+To install it manually:
+
+```bash
+sudo cp logrotate/site-monitor /etc/logrotate.d/site-monitor
+```
+
+Test the configuration in debug mode:
+
+```bash
+sudo logrotate -d /etc/logrotate.d/site-monitor
+```
+
+Force a test rotation:
+
+```bash
+sudo logrotate -f -v /etc/logrotate.d/site-monitor
+```
+
+This prevents log files from growing forever and keeps the last 4 weekly rotations compressed.
 
 ## What I learned
 
@@ -126,6 +151,7 @@ Jednoduchý Linux/Bash monitoring projekt pro kontrolu dostupnosti webů a procv
 * `urls.txt` - seznam monitorovaných URL
 * `systemd/site-monitor.service` - ukázkový systemd service soubor
 * `systemd/site-monitor.timer` - ukázkový systemd timer soubor
+* `logrotate/site-monitor` - ukázková logrotate konfigurace
 * `logs/status.txt` - aktuální stav monitoringu
 * `logs/alerts.log` - historie alertů DOWN/RECOVERED
 * `state/` - interní stavové soubory pro monitorované URL
@@ -165,6 +191,30 @@ Příklad cron příkazu:
 ```bash
 */5 * * * * (mkdir -p /root/training/cron_logs && /usr/bin/flock -n -E 99 /tmp/site-monitor.lock /root/training/site/run-sites.sh) >> /root/training/cron_logs/cron.log 2>&1
 ```
+
+## Použití přes logrotate
+
+Ukázková logrotate konfigurace je ve složce `logrotate/`.
+
+Ruční instalace:
+
+```bash
+sudo cp logrotate/site-monitor /etc/logrotate.d/site-monitor
+```
+
+Test konfigurace v debug režimu:
+
+```bash
+sudo logrotate -d /etc/logrotate.d/site-monitor
+```
+
+Vynucený test rotace:
+
+```bash
+sudo logrotate -f -v /etc/logrotate.d/site-monitor
+```
+
+Tím se zabrání tomu, aby log soubory rostly donekonečna. Konfigurace nechává poslední 4 týdenní rotace a staré logy komprimuje.
 
 ## Co jsem se naučil
 
