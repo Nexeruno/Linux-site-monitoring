@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-Environment=MONITOR_SOFT_FAIL=1
+EnvironmentFile=/root/training/site/config.env
 ExecStart=/usr/bin/flock -n -E 99 /tmp/site-monitor.lock /root/training/site/run-sites.sh
 
 

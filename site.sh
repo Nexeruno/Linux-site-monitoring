@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
 LOG_FILE="$LOG_DIR/site.log"
 CSV_FILE="$LOG_DIR/site.csv"
-SLOW_LIMIT="2"
+SLOW_LIMIT="${SLOW_LIMIT:-2}"
 VERSION="1.0.0"
 
 version(){

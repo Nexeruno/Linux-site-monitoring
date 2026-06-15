@@ -6,6 +6,7 @@ ALERT_FILE="$LOG_DIR/alerts.log"
 URL_FILE="$SCRIPT_DIR/urls.txt"
 STATE_DIR="$SCRIPT_DIR/state"
 STATUS_FILE="$LOG_DIR/status.txt"
+MONITOR_SOFT_FAIL="${MONITOR_SOFT_FAIL:-0}"
 
 mkdir -p "$LOG_DIR"
 mkdir -p "$STATE_DIR"
