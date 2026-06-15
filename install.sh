@@ -49,12 +49,33 @@ create_runtime_dirs(){
  echo "OK: runtime directories are ready."
 }
 
+check_required_commands(){
+ local missing=0
+
+ for cmd in curl flock systemctl; do
+  if ! command -v "$cmd" > /dev/null 2>&1; then
+   echo "ERROR: Required command not found: $cmd"
+   missing=1
+  fi
+ done
+
+ if [[ "$missing" -ne 0 ]]; then
+  echo "ERROR: Install missing required commands before continuing"
+  exit 1
+ fi
+
+ echo "OK: required commands are available."
+}
+
+
+
 main(){
 
  require_root
  check_project_dir
  create_config_env
  create_runtime_dirs
+ check_required_commands
  echo "OK: install checks passed."
 }
 
