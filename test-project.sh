@@ -1,7 +1,8 @@
 #!/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/root/training/site"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$SCRIPT_DIR"
 
 check_bash_syntax(){
     echo "Checking Bash syntax..."
