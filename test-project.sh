@@ -20,8 +20,6 @@ check_required_files(){
     echo "Checking required files..."
 
     local files=(
-        urls.txt
-        config.env
         "urls.txt"
         "config.env.example"
         "run-sites.sh"
