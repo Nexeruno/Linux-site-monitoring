@@ -1,276 +1,443 @@
 # Linux Site Monitoring
 
-Simple Linux/Bash monitoring project for checking website availability and practicing basic DevOps/Linux operations.
+A small Linux/DevOps monitoring project written in Bash.
 
-## Features
+The project checks a list of websites from `urls.txt`, stores logs and state, detects failed/recovered websites, and can run automatically through a `systemd` timer.
 
-* checks multiple URLs from `urls.txt`
-* ignores empty lines and comments
-* trims spaces around URLs
-* validates URL format
-* checks website availability using Bash and `curl`
-* logs results into `.log` and `.csv` files
-* creates alert events: `DOWN` / `RECOVERED`
-* stores website state to prevent repeated alert spam
-* creates a current status report in `status.txt`
-* supports runtime configuration through `config.env`
-* supports cron execution as an alternative
-* supports systemd service and systemd timer
-* uses `flock` to prevent parallel runs
-* supports log rotation with `logrotate`
-
-## Main technologies
-
-* Linux
-* Bash
-* curl
-* cron
-* systemd
-* systemd timer
-* journalctl
-* flock
-* logrotate
-* Git / GitHub
-
-## Project files
-
-* `site.sh` - checks one URL
-* `run-sites.sh` - runs checks for all URLs from `urls.txt`
-* `urls.txt` - list of monitored URLs
-* `config.env.example` - example runtime configuration
-* `config.env` - local runtime configuration, ignored by Git
-* `systemd/site-monitor.service` - example systemd service file
-* `systemd/site-monitor.timer` - example systemd timer file
-* `logrotate/site-monitor` - example logrotate configuration
-* `logs/status.txt` - current status report
-* `logs/alerts.log` - DOWN/RECOVERED alert history
-* `state/` - internal state files for monitored URLs
-
-> Runtime files such as `logs/`, `state/` and local `config.env` are ignored by Git and are generated or configured locally.
-
-## Configuration
-
-The project uses a local `config.env` file for runtime configuration.
-
-Create it from the example file:
-
-```bash
-cp config.env.example config.env
-```
-
-Example values:
-
-```bash
-SLOW_LIMIT=2
-MONITOR_SOFT_FAIL=1
-```
-
-`SLOW_LIMIT` defines when a website is considered slow.
-
-`MONITOR_SOFT_FAIL=1` allows the systemd service to finish successfully even when some monitored sites are down. The degraded state is still visible in `status.txt` and `alerts.log`.
-
-The local `config.env` file is ignored by Git.
-
-## Systemd usage
-
-Example systemd files are included in the `systemd/` directory.
-
-To install them manually:
-
-```bash
-sudo cp systemd/site-monitor.service /etc/systemd/system/site-monitor.service
-sudo cp systemd/site-monitor.timer /etc/systemd/system/site-monitor.timer
-sudo systemctl daemon-reload
-sudo systemctl enable --now site-monitor.timer
-```
-
-Useful commands:
-
-```bash
-systemctl status site-monitor.timer
-systemctl status site-monitor.service
-systemctl list-timers | grep site-monitor
-journalctl -u site-monitor.service -n 50
-```
-
-The timer runs the monitoring script every 5 minutes through `site-monitor.service`.
-
-## Cron usage
-
-Cron support was used as the first automation step. The recommended current setup is systemd timer, but cron can still be used as an alternative.
-
-Example cron command:
-
-```bash
-*/5 * * * * (mkdir -p /root/training/cron_logs && /usr/bin/flock -n -E 99 /tmp/site-monitor.lock /root/training/site/run-sites.sh) >> /root/training/cron_logs/cron.log 2>&1
-```
-
-## Logrotate usage
-
-Example logrotate configuration is included in the `logrotate/` directory.
-
-To install it manually:
-
-```bash
-sudo cp logrotate/site-monitor /etc/logrotate.d/site-monitor
-```
-
-Test the configuration in debug mode:
-
-```bash
-sudo logrotate -d /etc/logrotate.d/site-monitor
-```
-
-Force a test rotation:
-
-```bash
-sudo logrotate -f -v /etc/logrotate.d/site-monitor
-```
-
-This prevents log files from growing forever and keeps the last 4 weekly rotations compressed.
-
-## What I learned
-
-This project helped me practice Linux, Bash scripting, working with files and paths, exit codes, environment configuration, logging, troubleshooting, cron automation, systemd services, systemd timers, journalctl, flock, logrotate and basic monitoring logic.
-
-The goal was not to use a ready-made monitoring tool, but to understand how monitoring, logs, automation and operational behavior work directly in Linux.
+This project was built as a practical Linux automation portfolio project.
 
 ---
 
-# Linux monitoring webů
+## What this project does
 
-Jednoduchý Linux/Bash monitoring projekt pro kontrolu dostupnosti webů a procvičení základů Linux/DevOps provozu.
+- Reads monitored URLs from `urls.txt`
+- Skips empty lines and comments
+- Validates that URLs start with `http://` or `https://`
+- Checks website availability with `curl`
+- Logs results into local log files
+- Stores previous website state in `state/`
+- Detects status changes such as DOWN and RECOVERED
+- Can run manually or automatically with `systemd`
+- Provides install, uninstall, health-check and test scripts
+- Includes a Makefile for common project commands
+- Includes GitHub Actions CI for basic project checks
 
-## Funkce
+---
 
-* kontrola více URL ze souboru `urls.txt`
-* ignorování prázdných řádků a komentářů
-* ořezání mezer kolem URL
-* validace formátu URL
-* kontrola dostupnosti webů pomocí Bash a `curl`
-* logování výsledků do `.log` a `.csv` souborů
-* alerty `DOWN` / `RECOVERED`
-* ukládání stavu webů, aby se neopakovaly stejné alerty pořád dokola
-* aktuální status report v souboru `status.txt`
-* podpora runtime konfigurace přes `config.env`
-* podpora spouštění přes cron jako alternativa
-* podpora systemd service a systemd timeru
-* ochrana proti paralelnímu spuštění pomocí `flock`
-* rotace logů pomocí `logrotate`
+## Technologies used
 
-## Použité technologie
+- Linux
+- Bash
+- curl
+- systemd service
+- systemd timer
+- journalctl
+- logrotate
+- Git
+- GitHub Actions
+- Makefile
 
-* Linux
-* Bash
-* curl
-* cron
-* systemd
-* systemd timer
-* journalctl
-* flock
-* logrotate
-* Git / GitHub
+---
 
-## Hlavní soubory projektu
+## Project structure
 
-* `site.sh` - kontrola jedné URL
-* `run-sites.sh` - spouští kontrolu všech URL ze souboru `urls.txt`
-* `urls.txt` - seznam monitorovaných URL
-* `config.env.example` - ukázková runtime konfigurace
-* `config.env` - lokální runtime konfigurace, ignorovaná Gitem
-* `systemd/site-monitor.service` - ukázkový systemd service soubor
-* `systemd/site-monitor.timer` - ukázkový systemd timer soubor
-* `logrotate/site-monitor` - ukázková logrotate konfigurace
-* `logs/status.txt` - aktuální stav monitoringu
-* `logs/alerts.log` - historie alertů DOWN/RECOVERED
-* `state/` - interní stavové soubory pro monitorované URL
+```text
+.
+├── .github/workflows/
+│   └── project-check.yml
+├── logrotate/
+│   └── site-monitor
+├── systemd/
+│   ├── site-monitor.service
+│   └── site-monitor.timer
+├── config.env.example
+├── health-check.sh
+├── install.sh
+├── Makefile
+├── README.md
+├── run-sites.sh
+├── site.sh
+├── test-project.sh
+├── uninstall.sh
+└── urls.txt
+```
 
-> Runtime soubory jako `logs/`, `state/` a lokální `config.env` nejsou ukládané do Gitu a vytvoří se nebo nastaví lokálně.
+Runtime/local files and directories:
 
-## Konfigurace
+```text
+config.env
+logs/
+state/
+```
 
-Projekt používá lokální soubor `config.env` pro runtime konfiguraci.
+These are not meant to be committed to Git.
 
-Vytvoření z ukázkového souboru:
+---
+
+## Configuration
+
+Copy the example configuration:
 
 ```bash
 cp config.env.example config.env
 ```
 
-Příklad hodnot:
+Then edit it if needed:
 
 ```bash
-SLOW_LIMIT=2
-MONITOR_SOFT_FAIL=1
+nano config.env
 ```
 
-`SLOW_LIMIT` určuje, kdy je web považovaný za pomalý.
+The real `config.env` file is local only and should not be committed.
 
-`MONITOR_SOFT_FAIL=1` dovolí systemd službě doběhnout úspěšně i ve chvíli, kdy některý monitorovaný web nefunguje. Stav `DEGRADED` je pořád vidět v `status.txt` a `alerts.log`.
+---
 
-Lokální soubor `config.env` je ignorovaný Gitem.
+## URLs file
 
-## Použití přes systemd
+Websites are configured in:
 
-Ukázkové systemd soubory jsou ve složce `systemd/`.
+```text
+urls.txt
+```
 
-Ruční instalace:
+Example:
+
+```text
+https://google.com
+https://seznam.cz
+# https://example.com
+```
+
+Empty lines and lines starting with `#` are ignored.
+
+---
+
+## Manual run
+
+Run monitoring manually:
 
 ```bash
-sudo cp systemd/site-monitor.service /etc/systemd/system/site-monitor.service
-sudo cp systemd/site-monitor.timer /etc/systemd/system/site-monitor.timer
-sudo systemctl daemon-reload
-sudo systemctl enable --now site-monitor.timer
+./run-sites.sh
 ```
 
-Užitečné příkazy:
+Run a single website check:
 
 ```bash
-systemctl status site-monitor.timer
-systemctl status site-monitor.service
-systemctl list-timers | grep site-monitor
-journalctl -u site-monitor.service -n 50
+./site.sh https://example.com
 ```
 
-Timer spouští monitoring každých 5 minut přes `site-monitor.service`.
+---
 
-## Použití přes cron
+## Install
 
-Cron byl použitý jako první krok automatizace. Aktuálně je doporučený systemd timer, ale cron může zůstat jako alternativa.
-
-Příklad cron příkazu:
+The install script prepares the project and installs the systemd files.
 
 ```bash
-*/5 * * * * (mkdir -p /root/training/cron_logs && /usr/bin/flock -n -E 99 /tmp/site-monitor.lock /root/training/site/run-sites.sh) >> /root/training/cron_logs/cron.log 2>&1
+./install.sh
 ```
 
-## Použití přes logrotate
+It performs these steps:
 
-Ukázková logrotate konfigurace je ve složce `logrotate/`.
+- checks required commands
+- creates `config.env` from `config.env.example` if needed
+- creates runtime directories
+- installs systemd service and timer files
+- reloads systemd
+- enables and starts the timer
+- verifies that the timer is enabled and active
 
-Ruční instalace:
+---
+
+## Health check
+
+Check the current project/systemd status:
 
 ```bash
-sudo cp logrotate/site-monitor /etc/logrotate.d/site-monitor
+./health-check.sh
 ```
 
-Test konfigurace v debug režimu:
+Or through Makefile:
 
 ```bash
-sudo logrotate -d /etc/logrotate.d/site-monitor
+make health
 ```
 
-Vynucený test rotace:
+The health check verifies:
+
+- required local files
+- runtime directories
+- systemd timer enabled state
+- systemd timer active state
+- recent service logs
+
+Note: `site-monitor.service` is a short-running service. It does not need to stay active all the time. The important part is that `site-monitor.timer` is active.
+
+---
+
+## Uninstall
+
+Remove the installed systemd timer and service:
 
 ```bash
-sudo logrotate -f -v /etc/logrotate.d/site-monitor
+./uninstall.sh
 ```
 
-Tím se zabrání tomu, aby log soubory rostly donekonečna. Konfigurace nechává poslední 4 týdenní rotace a staré logy komprimuje.
+The uninstall script removes systemd files but keeps local runtime data:
 
-## Co jsem se naučil
+```text
+config.env
+logs/
+state/
+```
 
-Na projektu jsem si procvičil Linux, Bash skriptování, práci se soubory a cestami, exit kódy, environment konfiguraci, logování, troubleshooting, automatizaci přes cron, systemd služby, systemd timery, journalctl, flock, logrotate a základní logiku monitoringu.
+---
 
-Cílem nebylo použít hotové monitorovací řešení, ale pochopit, jak monitoring, logy, automatizace a provozní chování fungují přímo v Linuxu.
+## Common commands
 
+Using Makefile:
+
+```bash
+make test
+make health
+make install
+make uninstall
+make run
+make logs
+make timer
+make status
+```
+
+Direct script usage:
+
+```bash
+./test-project.sh
+./health-check.sh
+./install.sh
+./uninstall.sh
+./run-sites.sh
+```
+
+---
+
+## Testing
+
+Run local project checks:
+
+```bash
+./test-project.sh
+```
+
+Or:
+
+```bash
+make test
+```
+
+The test script checks:
+
+- Bash syntax
+- required project files
+- required project directories
+
+It does not require local runtime files such as:
+
+```text
+config.env
+logs/
+state/
+```
+
+because those are created during installation or runtime.
+
+---
+
+## GitHub Actions CI
+
+This project includes a GitHub Actions workflow:
+
+```text
+.github/workflows/project-check.yml
+```
+
+The workflow runs on:
+
+- push
+- pull request
+
+It checks the project by running:
+
+```bash
+./test-project.sh
+```
+
+This keeps CI safe because it does not try to install systemd services on the GitHub runner.
+
+---
+
+## What I practiced in this project
+
+This project was built to practice practical Linux/DevOps fundamentals:
+
+- Bash scripting
+- functions and arguments
+- if/else conditions
+- file and directory checks
+- working with logs
+- working with state files
+- curl-based website checks
+- systemd service and timer setup
+- journalctl debugging
+- install/uninstall automation
+- health-check scripting
+- local project tests
+- Makefile command shortcuts
+- Git workflow
+- GitHub Actions CI
+- debugging differences between local environment and CI
+
+---
+
+# Česká část
+
+## Linux Site Monitoring
+
+Malý Linux/DevOps monitoring projekt napsaný v Bashi.
+
+Projekt kontroluje seznam webů ze souboru `urls.txt`, ukládá logy a stav, pozná výpadek nebo obnovení webu a umí běžet automaticky přes `systemd` timer.
+
+Projekt je vytvořený jako praktický portfolio projekt pro Linux, automatizaci a DevOps základy.
+
+---
+
+## Co projekt dělá
+
+- čte sledované URL ze souboru `urls.txt`
+- ignoruje prázdné řádky a komentáře
+- kontroluje, že URL začíná na `http://` nebo `https://`
+- kontroluje dostupnost webů pomocí `curl`
+- ukládá výsledky do logů
+- ukládá předchozí stav webů do `state/`
+- pozná změny stavu jako DOWN a RECOVERED
+- dá se spustit ručně nebo automaticky přes `systemd`
+- obsahuje instalační, odinstalační, testovací a health-check skripty
+- obsahuje Makefile pro jednoduché příkazy
+- obsahuje GitHub Actions CI pro základní kontrolu projektu
+
+---
+
+## Použité technologie
+
+- Linux
+- Bash
+- curl
+- systemd service
+- systemd timer
+- journalctl
+- logrotate
+- Git
+- GitHub Actions
+- Makefile
+
+---
+
+## Instalace
+
+```bash
+./install.sh
+```
+
+Instalační skript:
+
+- zkontroluje potřebné příkazy
+- vytvoří `config.env` z `config.env.example`, pokud chybí
+- vytvoří runtime složky
+- nainstaluje systemd service a timer
+- provede `systemctl daemon-reload`
+- zapne a spustí timer
+- ověří, že timer je enabled a active
+
+---
+
+## Kontrola stavu
+
+```bash
+./health-check.sh
+```
+
+Nebo:
+
+```bash
+make health
+```
+
+Health-check kontroluje:
+
+- konfigurační soubory
+- runtime složky
+- jestli je timer enabled
+- jestli je timer active
+- poslední logy služby
+
+Důležité: `site-monitor.service` je krátce běžící služba. Nemusí být pořád aktivní. Důležité je, že `site-monitor.timer` běží.
+
+---
+
+## Odinstalace
+
+```bash
+./uninstall.sh
+```
+
+Odinstalace smaže systemd service/timer soubory, ale nechá lokální data:
+
+```text
+config.env
+logs/
+state/
+```
+
+---
+
+## Testování
+
+```bash
+./test-project.sh
+```
+
+Nebo:
+
+```bash
+make test
+```
+
+Testovací skript kontroluje:
+
+- Bash syntaxi
+- důležité projektové soubory
+- důležité projektové složky
+
+Nekontroluje lokální runtime věci jako `config.env`, `logs/` a `state/`, protože ty vznikají až při instalaci nebo běhu projektu.
+
+---
+
+## Co jsem se na projektu naučil
+
+Na projektu jsem si procvičil:
+
+- Bash skriptování
+- funkce a argumenty
+- podmínky `if/else`
+- kontroly souborů a složek
+- práci s logy
+- práci se stavovými soubory
+- kontrolu webů přes `curl`
+- systemd service
+- systemd timer
+- debugování přes `journalctl`
+- instalační a odinstalační automatizaci
+- health-check skript
+- lokální testovací skript
+- Makefile
+- Git workflow
+- GitHub Actions CI
+- rozdíl mezi lokálním prostředím a čistým CI prostředím
