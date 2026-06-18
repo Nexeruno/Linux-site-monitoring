@@ -45,10 +45,8 @@ check_required_dirs(){
     echo "Checking required directories..."
 
     local dirs=(
-        logs
-        state
-        logrotate
-        systemd
+        "logrotate"
+        "systemd"
     )
 
     for dir in "${dirs[@]}"; do
