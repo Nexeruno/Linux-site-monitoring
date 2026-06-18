@@ -1,0 +1,25 @@
+name: Project Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x run-sites.sh
+          chmod +x site.sh
+          chmod +x install.sh
+          chmod +x uninstall.sh
+          chmod +x health-check.sh
+          chmod +x test-project.sh
+
+      - name: Run project tests
+        run: ./test-project.sh
